@@ -13,9 +13,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sssssi", $ml_id, $team_name, $ign, $player_name, $position, $id);
 
     if ($stmt->execute()) {
-        echo "Player updated successfully!";
+        echo "success";
     } else {
-        echo "Error: " . $conn->error;
+        echo "error: " . $stmt->error;
     }
+
+    $stmt->close();
 }
+
+$conn->close();
 ?>

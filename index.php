@@ -1,8 +1,28 @@
 <?php
+session_start();
  include('partials\header.php');
  include('partials\sidebar.php');
 $conn = mysqli_connect("localhost", "root", "", "esports_db");
-$result = $conn->query("SELECT * FROM players");
+
+// Default query to fetch all players
+$sql = "SELECT * FROM players ORDER BY id DESC";
+
+// If a search query is submitted
+if (isset($_POST['search'])) {
+    $search = $_POST['search'];
+
+    // Use prepared statements to prevent SQL injection
+    $sql = "SELECT * FROM players WHERE id LIKE ? OR ml_id LIKE ? OR team_name LIKE ? OR player_name LIKE ? OR ign LIKE ?";
+
+    $stmt = $conn->prepare($sql);
+    $searchTerm = "%$search%";
+    $stmt->bind_param("sssss", $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    // Fetch all players if no search query
+    $result = $conn->query($sql);
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,11 +31,107 @@ $result = $conn->query("SELECT * FROM players");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CICTEsports: MLBB Players List</title>
+    <link rel="assets/css/style.css" href="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css">
+    <style>
+        /* Inline style for the title */
+        .profile-title {
+            background: linear-gradient(45deg, #00ffcc, #ff00ff, #00ffcc);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: bold;
+            animation: gradientAnimation 3s ease infinite;
+        }
 
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Gaming-themed styles */
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .card {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .table {
+            color: #ffffff;
+        }
+
+        .table thead th {
+            background-color: #333;
+            border-color: #444;
+        }
+
+        .table tbody tr {
+            background-color: #2a2a2a;
+        }
+
+        .table tbody tr:hover {
+            background-color: #333;
+        }
+
+        .btn-primary {
+            background-color: #00ffcc;
+            border-color: #00ffcc;
+            color: #1a1a1a;
+        }
+
+        .btn-primary:hover {
+            background-color: #ff00ff;
+            border-color: #ff00ff;
+        }
+
+        .btn-danger {
+            background-color: #ff4444;
+            border-color: #ff4444;
+        }
+
+        .btn-danger:hover {
+            background-color: #ff0000;
+            border-color: #ff0000;
+        }
+
+        .modal-content {
+            background-color: #2a2a2a;
+            color: #ffffff;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #444;
+        }
+
+        .pagination .page-item .page-link {
+            background-color: #333;
+            border-color: #444;
+            color: #00ffcc;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #00ffcc;
+            border-color: #00ffcc;
+            color: #1a1a1a;
+        }
+    </style>
 <main id="main" class="main">
 
 <div class="pagetitle">
-  <h1>Mobile Legends: Bang Bang Players List</h1>
+  <h1 class="profile-title">Mobile Legends: Bang Bang Players List</h1>
 </div><!-- End Page Title -->
 
 <div class="card">
@@ -25,80 +141,86 @@ $result = $conn->query("SELECT * FROM players");
                   <h5 class="card-title">Players</h5>
                 </div>
                 <div>
-                <button class="btn btn-primary mb-3" id="addPlayerBtn">Add Player</button>
+                <button class="btn btn-primary my-3" id="addPlayerBtn"><i class="ri-user-add-line"></i>Add Player</button>
                 </div>
               </div>
-
+</head>
 <body>
-    <div class="container mt-4">
+    <div class="container mt-4 table-responsive">
         
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ML ID</th>
-                    <th>Team Name</th>
-                    <th>IGN</th>
-                    <th>Player Name</th>
-                    <th>Position</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-    <?php
-    $result = $conn->query("SELECT * FROM players ORDER BY id DESC");
+        <table class="table-hover table table-bordered" id="playersTable">
+             <thead class="thead-dark">
+                            <tr>
+                                <th>ML ID</th>
+                                <th>Team Name</th>
+                                <th>IGN</th>
+                                <th>Player Name</th>
+                                <th>Position</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    echo "<tr>
+                                        <td>{$row['ml_id']}</td>
+                                        <td>{$row['team_name']}</td>
+                                        <td>{$row['ign']}</td>
+                                        <td>{$row['player_name']}</td>
+                                        <td>{$row['position']}</td>
+                                        <td>
+                                            <button class='btn btn-success edit-btn' data-id='{$row['id']}' data-mlid='{$row['ml_id']}' data-team='{$row['team_name']}' data-ign='{$row['ign']}' data-player='{$row['player_name']}' data-position='{$row['position']}'>Edit</button>
+                                            
+                                            <button class='btn btn-info view-btn' data-id='{$row['id']}' data-mlid='{$row['ml_id']}' data-team='{$row['team_name']}' data-ign='{$row['ign']}' data-player='{$row['player_name']}' data-position='{$row['position']}'>View</button>
+                                            
+                                            <button class='btn btn-danger delete-btn' data-id='{$row['id']}'>Delete</button>
+                                        </td>
+                                    </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='6'>No results found</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+        </table>
+    </div>
 
-    while ($row = $result->fetch_assoc()) {
-        echo "<tr>
-            <td>{$row['ml_id']}</td>
-            <td>{$row['team_name']}</td>
-            <td>{$row['ign']}</td>
-            <td>{$row['player_name']}</td>
-            <td>{$row['position']}</td>
-            <td>
-                <button class='btn btn-success edit-btn' data-id='{$row['id']}' data-mlid='{$row['ml_id']}' data-team='{$row['team_name']}' data-ign='{$row['ign']}' data-player='{$row['player_name']}' data-position='{$row['position']}'>Edit</button>
-                <button class='btn btn-info view-btn' data-id='{$row['id']}' data-mlid='{$row['ml_id']}' data-team='{$row['team_name']}' data-ign='{$row['ign']}' data-player='{$row['player_name']}' data-position='{$row['position']}'>View</button>
-                <button class='btn btn-danger delete-btn' data-id='{$row['id']}'>Delete</button>
-            </td>
-        </tr>";
-    }
-    ?>
-</tbody>
-
-
-</table>
-
- <!-- Modal for Adding Player -->
+ <!-- Add Player Modal -->
 <div class="modal fade" id="playerModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Add Player</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle"><i class="ri-user-add-line"></i> Add Player</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="playerForm">
                     <input type="hidden" id="playerId">
                     <div class="mb-3">
-                        <label>ML ID</label>
+                        <label class="form-label"><strong>ML ID</strong></label>
                         <input type="text" class="form-control" id="ml_id" required>
                     </div>
                     <div class="mb-3">
-                        <label>Team Name</label>
+                        <label class="form-label"><strong>Team Name</strong></label>
                         <input type="text" class="form-control" id="team_name" required>
                     </div>
                     <div class="mb-3">
-                        <label>IGN</label>
+                        <label class="form-label"><strong>IGN</strong></label>
                         <input type="text" class="form-control" id="ign" required>
                     </div>
                     <div class="mb-3">
-                        <label>Player Name</label>
+                        <label class="form-label"><strong>Player Name</strong></label>
                         <input type="text" class="form-control" id="player_name" required>
                     </div>
                     <div class="mb-3">
-                        <label>Position</label>
+                        <label class="form-label"><strong>Position</strong></label>
                         <input type="text" class="form-control" id="position" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -107,36 +229,39 @@ $result = $conn->query("SELECT * FROM players");
 
 <!-- Edit Player Modal -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="editModalLabel">Edit Player</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="editForm">
                     <input type="hidden" id="edit_id">
                     <div class="mb-3">
-                        <label>ML ID</label>
+                        <label class="form-label"><strong>ML ID</strong></label>
                         <input type="text" class="form-control" id="edit_ml_id" required>
                     </div>
                     <div class="mb-3">
-                        <label>Team Name</label>
+                        <label class="form-label"><strong>Team Name</strong></label>
                         <input type="text" class="form-control" id="edit_team_name" required>
                     </div>
                     <div class="mb-3">
-                        <label>IGN</label>
+                        <label class="form-label"><strong>IGN</strong></label>
                         <input type="text" class="form-control" id="edit_ign" required>
                     </div>
                     <div class="mb-3">
-                        <label>Player Name</label>
+                        <label class="form-label"><strong>Player Name</strong></label>
                         <input type="text" class="form-control" id="edit_player_name" required>
                     </div>
                     <div class="mb-3">
-                        <label>Position</label>
+                        <label class="form-label"><strong>Position</strong></label>
                         <input type="text" class="form-control" id="edit_position" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -145,22 +270,119 @@ $result = $conn->query("SELECT * FROM players");
 
 <!-- View Player Modal -->
 <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewModalLabel">Player Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p><strong>ML ID:</strong> <span id="view_ml_id"></span></p>
-                <p><strong>Team Name:</strong> <span id="view_team_name"></span></p>
-                <p><strong>IGN:</strong> <span id="view_ign"></span></p>
-                <p><strong>Player Name:</strong> <span id="view_player_name"></span></p>
-                <p><strong>Position:</strong> <span id="view_position"></span></p>
+                <div class="player-details">
+                    <div class="detail-item">
+                        <span class="detail-label"><strong>ML ID:</strong></span>
+                        <span class="detail-value" id="view_ml_id"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><strong>Team Name:</strong></span>
+                        <span class="detail-value" id="view_team_name"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><strong>IGN:</strong></span>
+                        <span class="detail-value" id="view_ign"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><strong>Player Name:</strong></span>
+                        <span class="detail-value" id="view_player_name"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><strong>Position:</strong></span>
+                        <span class="detail-value" id="view_position"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Player</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this player?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom styles for the View Player Modal */
+    .modal-content {
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .player-details {
+        padding: 20px;
+    }
+
+    .detail-item {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        margin-right: 10px;
+    }
+
+    .detail-value {
+        color: #212529;
+    }
+
+    .modal-footer {
+        border-top: 2px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-close-white {
+        filter: invert(1);
+    }
+    /* Slide-in from right */
+    .modal.fade .modal-dialog {
+        transition: transform 0.4s ease-out;
+        transform: translateX(100%);
+    }
+
+    .modal.show .modal-dialog {
+        transform: translateX(0);
+    }
+    
+</style>
 
  
 
@@ -176,16 +398,17 @@ $result = $conn->query("SELECT * FROM players");
               </nav>
             </div>
 
-            </main>
+        </main>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 $(document).ready(function() {
     // Open Add Player Modal
     $("#addPlayerBtn").click(function() {
         $("#playerId").val('');
         $("#playerForm")[0].reset();
-        $("#playerModal").modal("show"); // Ensure Bootstrap Modal is being triggered
+        $("#playerModal").modal("show");
     });
 
     // Save Player (Add or Edit)
@@ -202,147 +425,164 @@ $(document).ready(function() {
         };
 
         $.post(id ? "update_player.php" : "add_player.php", data, function(response) {
-            location.reload(); // Reload page after success
-        });
-    });
-});
-
-$(document).ready(function() {
-
-// Handle Edit Button Click
-$(".edit-btn").click(function() {
-    $("#edit_id").val($(this).data("id"));
-    $("#edit_ml_id").val($(this).data("mlid"));
-    $("#edit_team_name").val($(this).data("team"));
-    $("#edit_ign").val($(this).data("ign"));
-    $("#edit_player_name").val($(this).data("player"));
-    $("#edit_position").val($(this).data("position"));
-    $("#editModal").modal("show");
-});
-
-// Handle View Button Click
-$(".view-btn").click(function() {
-    $("#view_ml_id").text($(this).data("mlid"));
-    $("#view_team_name").text($(this).data("team"));
-    $("#view_ign").text($(this).data("ign"));
-    $("#view_player_name").text($(this).data("player"));
-    $("#view_position").text($(this).data("position"));
-    $("#viewModal").modal("show");
-});
-
-// Handle Delete Button Click
-$(".delete-btn").click(function() {
-    let playerId = $(this).data("id");
-    if (confirm("Are you sure you want to delete this player?")) {
-        $.post("delete_player.php", { id: playerId }, function(response) {
-            location.reload();
-        });
-    }
-});
-
-// Handle Edit Form Submission
-$("#editForm").submit(function(e) {
-    e.preventDefault();
-    $.post("edit_player.php", {
-        id: $("#edit_id").val(),
-        ml_id: $("#edit_ml_id").val(),
-        team_name: $("#edit_team_name").val(),
-        ign: $("#edit_ign").val(),
-        player_name: $("#edit_player_name").val(),
-        position: $("#edit_position").val()
-    }, function(response) {
-        location.reload();
-    });
-});
-
-});
-</script>
-
-<script>
-$(document).ready(function() {
-
-    // Handle Edit Button Click
-    $(".edit-btn").click(function() {
-        $("#edit_id").val($(this).data("id"));
-        $("#edit_ml_id").val($(this).data("mlid"));
-        $("#edit_team_name").val($(this).data("team"));
-        $("#edit_ign").val($(this).data("ign"));
-        $("#edit_player_name").val($(this).data("player"));
-        $("#edit_position").val($(this).data("position"));
-        $("#editModal").modal("show");
-    });
-
-    // Handle View Button Click
-    $(".view-btn").click(function() {
-        $("#view_ml_id").text($(this).data("mlid"));
-        $("#view_team_name").text($(this).data("team"));
-        $("#view_ign").text($(this).data("ign"));
-        $("#view_player_name").text($(this).data("player"));
-        $("#view_position").text($(this).data("position"));
-        $("#viewModal").modal("show");
-    });
-
-});
-</script>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-
-    // Handle Edit Button Click - Fill Form with Data
-    $(".edit-btn").click(function() {
-        $("#edit_id").val($(this).data("id"));
-        $("#edit_ml_id").val($(this).data("mlid"));
-        $("#edit_team_name").val($(this).data("team"));
-        $("#edit_ign").val($(this).data("ign"));
-        $("#edit_player_name").val($(this).data("player"));
-        $("#edit_position").val($(this).data("position"));
-        $("#editModal").modal("show");
-    });
-
-    // Handle Update Button Click
-    $("#editForm").submit(function(e) {
-        e.preventDefault(); // Prevent form from refreshing the page
-
-        $.ajax({
-            url: "edit_player.php",
-            type: "POST",
-            data: {
-                id: $("#edit_id").val(),
-                ml_id: $("#edit_ml_id").val(),
-                team_name: $("#edit_team_name").val(),
-                ign: $("#edit_ign").val(),
-                player_name: $("#edit_player_name").val(),
-                position: $("#edit_position").val()
-            },
-            success: function(response) {
-                if (response.trim() === "success") {
-                    alert("Player updated successfully!");
-                    location.reload();
+            if (response.trim() === "success") {
+                location.reload(); // Reload page after success
+            } else {
+                alert("Failed to save player. Error: " + response);
             }
         });
     });
 
+    // Handle Edit Button Click
+    $(document).on("click", ".edit-btn", function() {
+        let id = $(this).data("id");
+        let mlid = $(this).data("mlid");
+        let team = $(this).data("team");
+        let ign = $(this).data("ign");
+        let player = $(this).data("player");
+        let position = $(this).data("position");
+
+        // Populate the edit modal with data
+        $("#edit_id").val(id);
+        $("#edit_ml_id").val(mlid);
+        $("#edit_team_name").val(team);
+        $("#edit_ign").val(ign);
+        $("#edit_player_name").val(player);
+        $("#edit_position").val(position);
+
+        // Show the edit modal
+        $("#editModal").modal("show");
+    });
+
+    // Handle View Button Click
+    $(document).on("click", ".view-btn", function() {
+        let mlid = $(this).data("mlid");
+        let team = $(this).data("team");
+        let ign = $(this).data("ign");
+        let player = $(this).data("player");
+        let position = $(this).data("position");
+
+        // Populate the view modal with data
+        $("#view_ml_id").text(mlid);
+        $("#view_team_name").text(team);
+        $("#view_ign").text(ign);
+        $("#view_player_name").text(player);
+        $("#view_position").text(position);
+
+        // Show the view modal
+        $("#viewModal").modal("show");
+    });
+
+   $(document).ready(function() {
+    let playerIdToDelete = null;
+
+    // Handle Delete Button Click
+    $(document).on("click", ".delete-btn", function() {
+        playerIdToDelete = $(this).data("id"); // Store the player ID to delete
+        $("#deleteModal").modal("show"); // Show the delete confirmation modal
+    });
+
+    // Handle Confirm Delete Button Click
+    $("#confirmDelete").click(function(e) {
+            if (playerIdToDelete) {
+                $.post("delete_player.php", { id: playerIdToDelete }, function(response) {
+                    if (response.trim() === "success") {
+                        location.reload(); // Reload page after success
+                        alert("Player deleted successfully!");
+                    } else {
+                        alert("Failed to delete player. Error: " + response);
+                    }
+                }).fail(function(xhr, status, error) {
+                    console.error("AJAX request failed:", error);
+                    alert("AJAX request failed. Error: " + error);
+                });
+
+                // Close the modal
+                $("#deleteModal").modal("hide");
+                playerIdToDelete = null; // Reset the player ID
+            }
+        });
+    });
+    // Handle Edit Form Submission
+    $("#editForm").submit(function(e) {
+        e.preventDefault(); // Prevent form from refreshing the page
+
+        let data = {
+            id: $("#edit_id").val(),
+            ml_id: $("#edit_ml_id").val(),
+            team_name: $("#edit_team_name").val(),
+            ign: $("#edit_ign").val(),
+            player_name: $("#edit_player_name").val(),
+            position: $("#edit_position").val()
+        };
+
+        $.ajax({
+            url: "edit_player.php",
+            type: "POST",
+            data: data,
+            success: function(response) {
+                if (response.trim() === "success") {
+                    location.reload(); // Reload page after success
+                    // Update the table row dynamically
+                    let row = $(`button[data-id='${data.id}']`).closest("tr");
+                    row.find("td:eq(0)").text(data.ml_id); // ML ID
+                    row.find("td:eq(1)").text(data.team_name); // Team Name
+                    row.find("td:eq(2)").text(data.ign); // IGN
+                    row.find("td:eq(3)").text(data.player_name); // Player Name
+                    row.find("td:eq(4)").text(data.position); // Position
+
+                    // Close the modal
+                    $("#editModal").modal("hide");
+                    alert("Player updated successfully!");
+                } else {
+                    alert("Failed to update player. Error: " + response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX request failed:", error);
+                alert("AJAX request failed. Error: " + error);
+            }
+        });
+    });
 });
 
+    // Handle Search Form Submission
+    $(".search-form").submit(function(e) {
+        e.preventDefault(); // Prevent form submission
+        let searchQuery = $("input[name='search']").val();
+
+        // Send AJAX request to fetch filtered results
+        $.ajax({
+            url: "index.php",
+            type: "POST",
+            data: { search: searchQuery },
+            success: function(response) {
+                // Update the table body with the filtered results
+                $("#playersTable tbody").html($(response).find("#playersTable tbody").html());
+
+                // Reattach event listeners after updating the table
+                attachEventListeners();
+            }
+        });
+    })
 </script>
 
-
 <script>
-        function searchPlayers() {
-            let searchQuery = $("#searchInput").val();
-            let filterType = $("#filterType").val();
+    function selectProfileSuggestion(imageSrc) {
+        // Set the selected image as the profile picture
+        document.getElementById('profile_image').value = ''; // Clear the file input
+        // You can set the selected image to a hidden input or handle it as needed
+        console.log('Selected profile suggestion:', imageSrc);
+        // Example: Set the selected image to a hidden input field
+        document.getElementById('selected_profile_image').value = imageSrc;
+    }
+</script>
 
-            $.post("search_players.php", {
-                searchQuery: searchQuery,
-                filterType: filterType
-            }, function(data) {
-                $("#playersTable").html(data);
-            });
-        }
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script>
     
 </body>
+
+
 
 </html>
 <?php

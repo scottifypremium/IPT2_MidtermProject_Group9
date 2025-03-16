@@ -323,6 +323,7 @@ $(document).ready(function() {
                 if (response.trim() === "success") {
                     alert("Player updated successfully!");
                     location.reload();
+                }
             }
         });
     });

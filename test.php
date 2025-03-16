@@ -1,3 +1,3 @@
 <?php
-    include('database/database.php');
+    include 'db_connect.php';
 ?>
