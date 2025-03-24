@@ -31,103 +31,10 @@ if (isset($_POST['search'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CICTEsports: MLBB Players List</title>
-    <link rel="assets/css/style.css" href="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css">
-    <style>
-        /* Inline style for the title */
-        .profile-title {
-            background: linear-gradient(45deg, #00ffcc, #ff00ff, #00ffcc);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2.5rem;
-            font-weight: bold;
-            animation: gradientAnimation 3s ease infinite;
-        }
-
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Gaming-themed styles */
-        body {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            font-family: 'Arial', sans-serif;
-        }
-
-        .card {
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .table {
-            color: #ffffff;
-        }
-
-        .table thead th {
-            background-color: #333;
-            border-color: #444;
-        }
-
-        .table tbody tr {
-            background-color: #2a2a2a;
-        }
-
-        .table tbody tr:hover {
-            background-color: #333;
-        }
-
-        .btn-primary {
-            background-color: #00ffcc;
-            border-color: #00ffcc;
-            color: #1a1a1a;
-        }
-
-        .btn-primary:hover {
-            background-color: #ff00ff;
-            border-color: #ff00ff;
-        }
-
-        .btn-danger {
-            background-color: #ff4444;
-            border-color: #ff4444;
-        }
-
-        .btn-danger:hover {
-            background-color: #ff0000;
-            border-color: #ff0000;
-        }
-
-        .modal-content {
-            background-color: #2a2a2a;
-            color: #ffffff;
-        }
-
-        .modal-header {
-            border-bottom: 1px solid #444;
-        }
-
-        .modal-footer {
-            border-top: 1px solid #444;
-        }
-
-        .pagination .page-item .page-link {
-            background-color: #333;
-            border-color: #444;
-            color: #00ffcc;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #00ffcc;
-            border-color: #00ffcc;
-            color: #1a1a1a;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/style1.css">
+    <link rel="stylesheet" href="assets/css/style_modal.css">
 <main id="main" class="main">
 
 <div class="pagetitle">
@@ -326,65 +233,6 @@ if (isset($_POST['search'])) {
         </div>
     </div>
 </div>
-
-<style>
-    /* Custom styles for the View Player Modal */
-    .modal-content {
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .modal-header {
-        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .modal-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-
-    .player-details {
-        padding: 20px;
-    }
-
-    .detail-item {
-        margin-bottom: 15px;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .detail-label {
-        font-weight: 600;
-        color: #495057;
-        margin-right: 10px;
-    }
-
-    .detail-value {
-        color: #212529;
-    }
-
-    .modal-footer {
-        border-top: 2px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-close-white {
-        filter: invert(1);
-    }
-    /* Slide-in from right */
-    .modal.fade .modal-dialog {
-        transition: transform 0.4s ease-out;
-        transform: translateX(100%);
-    }
-
-    .modal.show .modal-dialog {
-        transform: translateX(0);
-    }
-    
-</style>
-
- 
 
 <div class="mx-4">
               <nav aria-label="Page navigation example">

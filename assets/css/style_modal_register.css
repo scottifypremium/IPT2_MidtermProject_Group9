@@ -1,0 +1,35 @@
+
+    /* Center the profile image preview */
+    .text-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Style the profile image preview */
+    #profile_image_preview {
+        max-width: 100px;
+        margin-top: 10px;
+        cursor: pointer;
+        border: 2px solid #6a11cb;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    #profile_image_preview:hover {
+        transform: scale(1.1);
+    }
+
+    /* Style the modal */
+    .modal-content {
+        background-color: transparent;
+        border: none;
+    }
+
+    .modal-body {
+        padding: 0;
+    }
+
+    #modalImage {
+        border-radius: 10px;
+    }
