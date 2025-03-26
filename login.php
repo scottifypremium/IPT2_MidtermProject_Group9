@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>CICT Esports Login</title>
+  <title>CICT eSports Login</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
             <div class="d-flex justify-content-center">
               <a href="index.html" class="logo d-flex align-items-center w-auto">
                 <div class="bi bi-controller"></div>
-                <span class="d-none d-lg-block">CICTEsports</span>
+                <span class="d-none d-lg-block">CICT eSports</span>
               </a>
             </div><!-- End Logo -->
 
