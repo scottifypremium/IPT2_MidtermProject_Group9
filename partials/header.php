@@ -8,7 +8,7 @@ $username = $_SESSION['username'] ?? 'Guest'; // Get the username or default to 
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>CICT Esports</title>
+  <title>CICT eSports</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -50,7 +50,7 @@ $username = $_SESSION['username'] ?? 'Guest'; // Get the username or default to 
       <!-- Gaming Logo Icon -->
       <i class="bi bi-controller" style="font-size: 2rem; color:rgb(52, 10, 240);"></i>
       <!-- Text -->
-      <span class="d-none d-lg-block" style="font-size: 1.5rem; font-weight: bold; margin-left: 10px;">CICT ESports</span>
+      <span class="d-none d-lg-block" style="font-size: 1.5rem; font-weight: bold; margin-left: 10px;">CICT eSports</span>
     </a>
     <i class="bi bi-list toggle-sidebar-btn"></i>
   </div><!-- End Logo -->
