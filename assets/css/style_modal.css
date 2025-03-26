@@ -1,0 +1,53 @@
+   /* Custom styles for the View Player Modal */
+    .modal-content {
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .player-details {
+        padding: 20px;
+    }
+
+    .detail-item {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        margin-right: 10px;
+    }
+
+    .detail-value {
+        color: #212529;
+    }
+
+    .modal-footer {
+        border-top: 2px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-close-white {
+        filter: invert(1);
+    }
+    /* Slide-in from right */
+    .modal.fade .modal-dialog {
+        transition: transform 0.4s ease-out;
+        transform: translateX(100%);
+    }
+
+    .modal.show .modal-dialog {
+        transform: translateX(0);
+    }
